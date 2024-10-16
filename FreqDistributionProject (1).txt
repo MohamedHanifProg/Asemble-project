@@ -1,0 +1,850 @@
+Main,		LDA	GradesStart
+		STA	GradesPtr
+		LDA	StrChosPtr
+		BSA	puts
+		BSA	getSignedInt
+		STA	TempInp
+		LDA	TempInp
+		BSA	ZeroOrOne
+		LDA	TempInp
+ifChosed,	ADD	Minus1
+		SZA
+		BUN	End10
+		BUN	GetNums		
+GetNums,	LDA	Cizar
+		BSA	putc1
+		BSA	getSignedInt
+		STA	TempInp
+		LDA	TempInp
+		ADD	Terminator
+		SZA
+		BUN	SaveGrades
+		LDA	TempInp
+		STA	GradesPtr I
+		BUN	End10
+SaveGrades,	LDA	TempInp
+		BSA	CheckInput
+		LDA	TempInp
+		STA	GradesPtr I
+		ISZ	GradesPtr
+		BUN	GetNums
+ End10,		LDA	FreqStart	
+		STA	FreqPtr		// freqPtr = @frequencies	
+		LDA	GradesStart
+		STA	GradesPtr 
+		BSA 	CheckGrades	
+		BSA	 sumgrades
+		STA	 Avg		// Grades Average
+		LDA	Counter2
+		BSA	PUSH		
+		LDA	FreqStart
+		BSA	PUSH
+		BSA	MaxMinFreq
+		BSA	POP
+		STA	MaxGrade	// MaxInterval
+		BSA	POP
+		STA	MinGrade	// MinInterval
+		LDA	Str1PTR
+		BSA	puts		// printf(Number of students = 20)
+		LDA	NumOfStudents
+		BSA	putSignedInt
+		LDA	Str2Ptr
+		BSA	puts
+		LDA	Avg
+		BSA	putSignedInt
+		LDA	Str3Ptr
+		BSA	puts
+		LDA	FreqStart
+		STA	FreqPtr
+		BSA	PrintStars
+		LDA	Str4Ptr
+		BSA	puts
+		LDA	Str5Ptr
+		BSA	puts
+		LDA	MaxGrade
+		BSA	putSignedInt
+		LDA	Str6Ptr
+		BSA	puts
+		LDA	MinGrade
+		BSA	putSignedInt	
+		HLT	
+		
+		
+
+
+// PutUnsignedInt(Num);
+//
+OneHundred1,	DEC	-101
+NumOfStudents,	DEC	0
+Avg,		DEC	0
+//
+putSignedInt,   HEX 0               // putSignedInt(short signed int Tnum) {
+                STA TNumP           //
+                CLA                 //
+                STA Flag_print      // Flag_print = 0
+                LDA Power10Ptr      //
+                STA Ptr             // Ptr = @Power10Array
+                LDA It_count        //
+                STA Count           // Count = It_count; i.e. 4 in the case of 16 bits
+                LDA TNumP           // IF (TNum <0)
+                SNA                 //
+                BUN Positive        //
+Negative,       LDA TNumP           // THEN
+                CMA                 // stripped = -TNum ;
+                INC                 //
+                STA Stripped        //
+                LDA Sign_ascii      //
+                BSA putc1            // putc(“-“);
+                BUN ForLoop         //
+Positive,       LDA TNumP           // ELSE stripped = TNum ;
+                STA Stripped        // FI
+                                    //
+ForLoop,        LDA Count           // FOR (Count= It_count; Count > 0; Count--)
+                SPA                 //
+                BUN EndFor          //
+                CLA                 // DO digit =0;
+                STA Digit           //
+Loop,           LDA ptr I           // WHILE (Stripped - *Ptr > 0)
+                ADD Stripped        // DO
+                SNA                 //
+                BUN Continue1        //
+                BUN Outx            //
+Continue1,       STA Stripped        // Stripped=Stripped - *Ptr;
+                ISZ digit           // digit++;
+                BUN Loop            // OD;
+Outx,           LDA Flag_print      //
+                SZA                 // if(Flag_print != ON)
+                BUN print_digit     //
+                LDA digit           //
+                SZA                 //
+                BUN Flag_print_on   //
+                BUN end_flag        //
+Flag_print_on,  LDA FlagOn          //
+                STA Flag_print      //
+print_digit,    LDA digit           //
+                ADD ascii_Offset    //
+                BSA putc1          // Output(digit);
+end_flag,       ISZ ptr             // ptr++;
+                LDA count           // Count--;
+                ADD Minus1          //
+                STA Count           //
+                BUN ForLoop         // OD;
+EndFor,         LDA Stripped        //
+                ADD ascii_Offset    //
+                BSA putc1           // Output(last digit); // print units – the left over in ACC
+End,            BUN putSignedInt I  // return; }
+//
+// putSignedInt data
+Minus1,		DEC -1
+TNumP,          DEC 0               
+Flag_print,     DEC 0
+digit,          DEC 0
+Sign_ascii,     HEX 2D              // the "-" character
+ascii_Offset,   HEX 30              // digit to ascii representation offset
+Stripped,       DEC 0               // +ve value of TNum
+//
+
+count,          DEC 0
+It_count ,      DEC 4               // loop count (for 16 bit integer)
+Power10Ptr,     HEX 100             // @Power10Array
+ptr,            HEX 0               //
+//
+                ORG 100
+Power10Array,   DEC -10000          // -10 to power of 4
+                DEC -1000           // -10 to power of 3
+                DEC -100            // -10 to power of 2
+                DEC -10             // -10 to power of 1
+//
+
+
+
+		//Main Data 
+	//////data for strings
+Str1PTR,	Hex 	200
+		//
+		ORG 	200
+Str1, 		HEX	 4E	 // '"Number"'
+		HEX 	75
+		HEX	 6D
+		HEX	 62
+		HEX	 65
+		HEX 	72
+		HEX 	20	//"SPACE"
+		HEX 	4F
+		HEX 	66	// "OF"
+		HEX	20
+		HEX 	53
+		HEX 	74
+		HEX 	75
+		HEX	64	
+		HEX	65
+		HEX	6E
+		HEX	74
+		HEX	53	// "Students"
+		HEX	3D	// "="
+		HEX	20	// "space"	
+		DEC 	0		 // null - end of string = '\0
+Str2Ptr,	Hex	250
+		ORG	250
+Str2,		HEX	20
+		HEX	41
+		HEX	76
+		HEX	65
+		HEX	72
+		HEX	61
+		HEX	67
+		HEX	65 // Average
+		HEX	20 // SPACE
+		HEX	47
+		HEX	72
+		HEX	61
+		HEX	64
+		HEX	65 // Grade
+		HEX	3d	
+		Dec	0
+Str3Ptr,	HEX	300
+		ORG	300
+Str3,		HEX	0D
+		HEX	49
+		HEX	6E
+		HEX	74
+		HEX	65
+		HEX	72
+		HEX	76
+		HEX	61
+		HEX	6C	// Interval
+		HEX	9	// tab
+		HEX	46
+		HEX	72
+		HEX	65
+		HEX	71	// freq
+		HEX	2E
+		HEX	0D
+		DEC 	0
+
+Str4Ptr,	HEX	320
+		ORG	320
+Str4,		HEX	47
+		HEX	72
+		HEX	61	
+		HEX	64
+		HEX	65
+		HEX	20	// Grade
+		HEX	44
+		HEX	69
+		HEX	73
+		HEX	74
+		HEX	72
+		HEX	69
+		HEX	62
+		HEX	75
+		HEX	74
+		HEX	69
+		HEX	6F
+		HEX	6E
+		HEX	3A
+		HEX	20	// Distribution
+		DEC	0
+Str5Ptr,	HEX	350
+		ORG	350
+Str5,		HEX	4D
+		HEX	61
+		HEX	78
+		HEX	3D
+		HEX	20	// Max
+Str6Ptr,	HEX	360
+		ORG	360
+Str6,		HEX	20
+	 	HEX	4D
+		HEX	69
+		HEX	6E
+		HEX	3D 
+		HEX	20	// Min
+		DEC	0
+StrErrPtr,	HEX	370
+		ORG	370
+StrErr,		HEX	45
+		HEX	72
+		HEX	6F	
+		HEX	72
+		HEX	72
+		HEX	20	// Error
+		HEX	54
+		HEX	72
+		HEX	79	
+		HEX	20	// try
+		HEX	41
+		HEX	67
+		HEX	41
+		HEX	69
+		HEX	6E	// again
+		DEC	0
+StrChosPtr,	HEX	700
+		ORG	700
+StrChos,	HEX	43
+		HEX	68
+		HEX	6F
+		HEX	6F
+		HEX	73
+		HEX	65
+		HEX	20	// Choose
+		HEX	0D
+		HEX	30
+		HEX	20
+		HEX	2D
+		HEX	20
+		HEX	41
+		HEX	72
+		HEX	72
+		HEX	61
+		HEX	79	//0 - Array
+		HEX	0D
+		HEX	31
+		HEX	20
+		HEX	2D
+		HEX	20
+		HEX	4B
+		HEX	65
+		HEX	79
+		HEX	62
+		HEX	6F
+		HEX	61
+		HEX	72
+		HEX	64	//1- keyboard
+		HEX	0D
+		DEC	0
+
+	// Frequencies = ChickGrades()
+	//DATA
+		Intervals,	DEC	10
+		GradesSum,	DEC	0
+		MaxDistr,	DEC	0
+		MinDistr,	DEC	0
+		MaxGrade,	DEC	0
+		MinGrade,	DEC	0
+		// Subroutine puts()
+		puts,		 HEX 0 // void Puts( char* str ) {
+		STA 		pPtr // pPtr = str
+WLoop,		LDA pPtr I // WHILE ( (*pPtr ) != '\0')
+		SZA 		//
+		BUN 	DoOutput //
+		BUN	 pEND_Loop //
+// DO
+		DoOutput, BSA putc1 // putc (*pPtr);
+		ISZ pPtr // pPtr++;
+		BUN WLoop	 // OD;
+		// //	
+		pEND_Loop,BUN puts I // }
+		// Subroutine puts local data
+		pPtr,	HEX 0 // local temporary pointer
+		putc1,	 HEX 0 // char putc(char cc) {
+		POutLoop, SKO // output char when Screen ready;
+		BUN 	POutLoop //
+		OUT 		//
+		BUN 	putc1 I // }
+//GRADES ARRAY
+
+		GradesStart,	HEX	400
+		GradesPtr,	HEX	0	
+		ORG	400
+Grades,		DEC	0
+		DEC	-1
+		DEC	2
+		DEC	55	
+		DEC	11
+		DEC	22
+		DEC	33
+		DEC	44
+		DEC	56
+		DEC	57
+		DEC	99
+		DEC	100
+		DEC	58
+		DEC	66
+		DEC	76
+		DEC	78
+		DEC	77
+		DEC	77
+		DEC	77
+		DEC	88
+		DEC	-999
+
+	//FREQUENCIES ARRAY
+
+		FreqStart,	HEX	450
+		FreqPtr,	HEX	0
+		ORG	450
+Frequencies,	DEC 	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		Terminator,	DEC	999
+		Minus9,		DEC	-9
+		Minus10,	DEC	-10
+		Grade,		DEC	0
+		GradeInterval,	DEC	0
+		Counter,	DEC	0
+		OneHundred,	Dec	-100
+		Counter2,	Dec	10
+		CheckGrades,	HEX	0	
+MainWhile,	LDA 	GradesPtr I
+		ADD	Terminator
+		SZA			//WHILE Grades[i] != -999
+		BUN	BODY
+		BUN	End_Loop
+BODY,		CLA
+		STA	GradeInterval // GradeInterval = 0
+		LDA	GradesPtr I	
+		STA	Grade		// Grades[i] = Grade
+		LDA	Grade
+		Add	OneHundred	// if(Grade == 100)
+	if1,	SZA
+		BUN	While1
+		LDA	Grade
+		Add	Minus1		// Grade = Grade -1
+		STA	Grade		//
+
+While1,		LDA	Grade
+		ADD	Minus10	
+		SNA	             // while (grade >= 10)
+		BUN	CONTINUE
+		BUN	While1_End		
+CONTINUE, 	LDA 	Grade	
+		Add	Minus10
+		STA	Grade	
+		ISZ	GradeInterval	// gradeinterval++
+		BUN	While1		// Go to while1
+		BUN	MainWhile
+While1_End,	LDA	GradeInterval 
+		CMA
+		INC
+		ADD	Counter
+		SNA	
+		BUN	IncFreq		//frequencies[gradeinterval]++
+		ISZ	Counter
+		ISZ	FreqPtr
+		BUN	While1_End
+IncFreq,	ISZ	FreqPtr I
+		ISZ	GradesPtr	//GradesPtr++
+		LDA	FreqStart
+		STA	FreqPtr		//Return pointer to start
+		CLA
+		STA	Counter
+		BUN	MainWhile
+End_Loop,	BUN	CheckGrades I
+
+
+		
+
+
+/////////////////////////////////////////// SumOfGrades and numofstudents
+sumgrades,	HEX	0
+		CLA
+		STA	NumOfStudents 	// Initialize NumOfStudents to zero
+		STA	GradesSum	// Initialize GradesSum to zero
+		LDA	GradesStart
+		STA 	GradesPtr	// GradesPtr = @grades
+Wloop2,		LDA	GradesPtr I
+		ADD	Terminator
+		SZA			// while Grades[i] != -999
+		BUN	body2
+		BuN	if2
+body2,		ISZ	NumOfStudents	
+		LDA	GradesSum
+		Add	GradesPtr I
+		STA	GradesSum	// SumGrades += Grades[i]
+		ISZ	GradesPtr	// i++
+		BUN 	Wloop2
+if2,		LDA	NumOfStudents	
+		SPA			// if (numofstudents > 0)
+		BUN	else2
+Wloop3,		LDA	NumOfStudents
+		CMA	
+		INC	
+		ADD	GradesSum	//while(sum >= numofstduents)	
+		SNA
+		BUN	Body3
+		BUN	EndLoop2
+Body3,		LDA	NumOfStudents
+		CMA	
+		INC	
+		ADD	GradesSum
+		STA	GradesSum		// sum -= numofstudents
+		ISZ	Avg
+		BUN	Wloop3		
+else2,		BUN	EndLoop2
+EndLoop2,	LDA	Avg	
+		BUN	sumgrades I		// return avg
+/////////////////// Maximun and minumem frequenicy
+MaxMinFreq,	HEX	0
+		BSA	POP
+		STA	FreqPtr
+		BSA	POP
+		STA	Counter2
+		
+		LDA	FreqPtr I
+		STA	MaxGrade	// maxgrade = freq[0]
+		STA	MinGrade	// MinGrade = freq[0]
+MaxMinLoop,	LDA	Counter2
+		SPA			// while (count > 0)
+		BUN	EndMaxMinLoop
+		LDA	MaxGrade
+		CMA	
+		INC
+		ADD	FreqPtr I
+		SPA			// if(freq[i] > maxGrade)
+		BUN	ifMin
+		LDA	FreqPtr I
+		STA	MaxGrade	// Freq[i] = MaxGrade
+	
+ifMin,		LDA	MinGrade
+		CMA
+		INC
+		ADD	FreqPtr I	// if(Freq[i] < minGrade)
+		SNA
+		BUN	EndMaxMin
+		LDA	FreqPtr I
+		STA	MinGrade	// Freq[i] = MinGrade
+
+EndMaxMin,	ISZ	FreqPtr 
+		LDA	Counter2
+		ADD	Minus1
+		STA	Counter2		// count--
+		BUN	MaxMinLoop
+
+EndMaxMinLoop,  LDA	MinGrade
+		BSA	PUSH
+		LDA	MaxGrade
+		BSA 	PUSH
+		BUN	MaxMinFreq I
+	
+		// Stack operations Push & Pop
+		POP,	HEX 0 // AC POP() {
+		LDA 	SPtr // SPtr--;
+		ADD	Minus1 //
+		STA 	SPtr //
+		LDA 	SPtr I // AC = *SPtr;
+		BUN 	POP I // return }
+		//
+		PUSH,	HEX 0 // PUSH(AC) {
+		STA 	SPtr I // *SPtr = AC;
+		ISZ 	SPtr // SPtr++;
+		BUN 	PUSH I // return }
+		// Stack data
+		SPtr,	 HEX 600
+		ORG 	 600
+Stack,		DEC	  0 // allocate 6 locations for Stack
+		DEC	  0
+		DEC 	  0
+		DEC 	  0
+		DEC 	  0
+		DEC	  0
+StackTop,	DEC	  0
+
+
+
+///////Printing stars Function
+PrintStars,	Hex	0
+ForStar	,	LDA	I	// for1
+		ADD	Minus10
+		SNA		// for(int i = 0 , i < 10 , i++)
+		BUN 	EndStar	// the end of the loop
+		LDA	I
+		ADD	Minus9
+	if9,	SZA		// if ( i == 9)
+		BUN	Else9
+	Then9,	LDA	Ninety
+		BSA	putSignedInt
+		LDA	SH7TA
+		BSA	putc1
+		LDA	OneHun
+		BSA	putSignedInt	// 
+		LDA	TwoPoints
+		BSA	putc1		// :
+		LDA	Tab		// Tab
+		BSA	putc1
+		LDA	FreqPtr I
+		BSA	putSignedInt	//Printf(90-100 : freq[i])
+		LDA	Tab
+		BSA	putc1		// Tab
+		LDA	SH7TA2
+		BSA	putc1
+		BUN	ForStar2	// Go To for2
+Else9,		LDA	I
+		STA	TempFreq
+		CLE
+		CIL	
+		CIL
+		CIL
+		ADD	I
+		ADD	I
+		STA	TempFreq
+		BSA	putSignedInt
+		LDA	SH7TA
+		BSA	putc1
+		LDA	TempFreq
+		ADD	Nine
+		STA	TempFreq
+		BSA	putSignedInt	// printf(i * 10 - i * 10 +9)
+		LDA	TwoPoints
+		BSA	putc1
+		LDA	Tab
+		BSA	putc1
+		LDA	FreqPtr I
+		BSA	putSignedInt
+		LDA	Tab
+		BSA	putc1
+		LDA	SH7TA2
+		BSA	putc1		// Printf("|")
+		BUN	ForStar2
+ForStar2,	LDA	freqPtr I
+		CMA
+		INC
+		ADD	J		
+		SNA			// for(int j = 0 ; j < freq[i],j++)
+		BUN	EndStar2
+		LDA	Star
+		BSA	putc1	// printf("*)
+		ISZ	J	// J++
+		BUN	ForStar2
+EndStar2,	LDA	Line
+		BSA	putc1
+		ISZ	I
+		ISZ	FreqPtr // Freq[i++]
+		CLA
+		STA	J
+		BUN	ForStar	// printf("/n")
+EndStar,	LDA	Line
+		BSA	putc1
+		BUN	PrintStars I
+///Func Data
+TwoPoints,	HEX	3A
+Line,		HEX	0D
+J,		DEC	0
+I,		DEC	0
+Nine,		DEC	9
+TempFreq,	DEC	0
+OneHun,		DEC	100
+Ninety,		DEC	90		
+Star,		HEX	2A		//*
+Tab,		HEX	9		//\t
+SH7TA,		HEX	2D		// -
+SH7TA2,		HEX	7C		// |
+TempFrq,	DEC	0
+////////////////////////////////////////////////////////// INput 
+GetSignedInt,   HEX 0               // short unsigned int GetSignedInt()
+                CLA                 //
+                STA TNum2            // TNum = 0;
+                STA digit_counter                                       //  digit_counter = 0;
+                LDA FlagOFF         //
+                STA minus_Flag      // minus_Flag = OFF;
+In_char,        BSA getC_SignedInt  //
+                STA Cc              // cc = getc();
+                ADD minusMinusASCII // IF (cc= ‘-‘)
+                SZA                 //
+                BUN getUnsigned     //
+                LDA Cc                                                  //
+                BSA putc1                                                //echo 
+                LDA FlagOn          // THEN
+                STA minus_Flag      // minus_Flag = ON;
+                BSA getC_SignedInt  //
+                STA Cc              // cc = getc();
+                                    // FI
+//
+getUnsigned,    LDA Cc              
+                ADD minusBspace     
+                SZA                                                     //if(Cc == Bspace)
+                BUN not_zero
+                BUN check_counter
+not_zero,       LDA Cc              //
+                ADD minusCReturn   // WHILE (cc = getc() != ‘Enter’)
+                SZA                 //
+                BUN Convert         //
+                BUN End_loop10        //
+
+check_counter,  LDA digit_counter
+                SZA                                                     // if( digit_counter == 0) 
+                BUN not_zero2
+                BUN In_char
+not_zero2,      LDA NUM10
+                BSA PUSH
+                LDA TNum2
+                BSA PUSH
+                BSA divide
+                STA TNum2                                               //TNum = TNum / 10
+                LDA Cc
+                BSA putc1
+                LDA digit_counter
+                ADD Minus1
+                STA digit_counter                                       //digit_counter--;
+                BUN In_char
+
+Convert,        LDA Cc              // DO
+                BSA putc1                                                //echo
+                ADD mASCII_zero     // char = char – 30H;
+                STA Cc              //
+                LDA TNum2            //
+                BSA MultBy10        // TNum = TNum * 10 + char;
+                ADD Cc              //
+                STA TNum2            //
+                ISZ digit_counter                                       //digit_counter++;
+                BUN In_char         // OD;
+End_loop10,     LDA Cc                                                  //
+                BSA putc1                                                //echo 
+                LDA minus_Flag      //
+                SPA                 // IF (minus_Flag == ON)
+                BUN FI_1            //
+                LDA TNum2            // THEN
+                CMA
+                INC
+                STA TNum2            // TNum = -TNum;
+                                    // FI
+FI_1,           LDA TNum2
+                BUN GetSignedInt I  // return TNum
+//
+
+// GetSignedInt Data
+minusMinusASCII,HEX -2D             // “-“ sign in ASCII
+minus_Flag,     DEC 0               // indicates if input is a negative or positive number
+FlagOn,         DEC 1
+FlagOff,        DEC 0
+Num10, DEC 0   // Initialize Num10 to zero
+
+//
+// GetUnsignedInt Data
+TNum2,           DEC 0               // the input short unsigned integer
+Cc,             DEC 0               //
+mASCII_zero,    HEX -30             //
+minusCReturn,   HEX -D              //
+
+minusBspace,    HEX -8
+digit_counter,  DEC 0
+
+MultBy10,       HEX 0               // short int MultBy10(short int a) {
+                CLE                 //
+                CIL                 //
+                STA tmp             //
+                CIL                 //
+                CIL                 //
+                ADD tmp             // a = a * 10;
+                BUN MultBy10 I      // return a }
+// MultBy10 data
+tmp,            DEC 0
+
+getC_SignedInt, HEX 0               // char Getc() {
+Inp_char_GC,    SKI                 //
+                BUN Inp_char_GC     //
+                INP                 // input char
+                BUN getC_SignedInt I		
+
+////////////////////////////////////////Divide Func
+divide,		HEX	0
+		LDA	Divisor		//
+		CMA			//
+		INC			//
+		STA	mDivisor		// mDivisor = - Divisor;
+		CLA			// Digit =0; 
+		STA	DigitDiv		//
+Loop10,		LDA	mDivisor		// WHILE (Num – Divisor >=0) 
+		ADD	NumDiv		// DO  
+		SNA			//
+		BUN	Contin		//
+		BUN 	OutDig 		//
+Contin, 	LDA	mDivisor		//  
+		ADD	NumDiv		// 	
+		STA	NumDiv		//	 Num = Num – Divisor;   
+		ISZ	digit2		//	digit++;
+		BUN	Loop10		// OD;
+
+OutDig,		LDA	NumDiv		//  
+		STA	Remainder	// Remainder = Num – (digit * Divisor) 
+		HLT
+// Data
+Divisor,	DEC	3
+mDivisor,	DEC	0
+NumDiv,	   	DEC	33
+DigitDiv,	DEC	0
+digit2,		DEC	0	// result
+Remainder,	DEC	0	// remainder
+Cizar	,	HEX	3E
+
+////////////// Input array
+TempInp,	DEC	0
+InputStart,	HEX	500
+InputPtr,	HEX	0
+		ORG	500
+InputFreq,	DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+		DEC	0
+
+
+///////////////// CheckInput 
+CheckInput,	HEX	0
+		LDA	TempInp
+		
+		SNA		// if (Temp < 0)
+		BUN	Check100
+		BUN	EndCheck
+Check100,	LDA	TempInp
+		ADD	OneHundred1
+		SNA
+		BUN	EndCheck
+		BUN	ReturnCheck
+EndCheck,	LDA	StrErrPtr
+		BSA	puts	// printf(Error Please Try Again)
+		LDA	Line
+		BSA	putc1
+		BUN	GetNums
+ReturnCheck,	LDA	TempInp
+		BUN	CheckInput I
+/////////////////////// Check Zero Or one
+ZeroOrOne,	HEX	0
+		LDA	TempInp
+		SZA		// if he chosed 0
+		BUN	CheckOne
+		BUN	EndOneZero
+CheckOne,	LDA	TempInp
+		ADD	Minus1
+		SZA
+		BUN	EndCheck
+		BUN	EndOneZero	
+EndOneZero,	LDA	TempInp
+		BUN	ZeroOrOne I		
+	
+		
+		
+
+
+
+
+
+
+
+
+
+		
+			
+
+		
